@@ -23,7 +23,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  */
 @EnableDiscoveryClient
 @MapperScan("com.jhj.gulimall.product.dao")
-@SpringBootApplication
+@SpringBootApplication()
 public class GulimallProductApplication {
 
     public static void main(String[] args) {

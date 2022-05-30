@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: gulimall-product
+  cloud:
+    nacos:
+      config:
+        server-addr: 121.5.251.250:8848
+        namespace: f1506272-1bec-40d6-b4af-267b8ae263a5
+        ext-config:
+          - data-id: gulimall-product.yml
