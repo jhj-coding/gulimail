@@ -14,7 +14,13 @@ spring:
           predicates:
             - Path=/api/product/** #请求地址有api前缀
           filters:
-            - RewritePath=/api/product/(?<segment>.*),/product/$\{segment}
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+        - id: third_party_route
+          uri: lb://gulimall-third-party #负载均衡
+          predicates:
+            - Path=/api/thirdparty/** #请求地址有api前缀
+          filters:
+            - RewritePath=/api/thirdparty/(?<segment>.*),/$\{segment}
         - id: admin_route
           uri: lb://renren-fast #负载均衡
           predicates:

@@ -1,3 +1,4 @@
 logging:
   level:
     com.jhj.gulimall: debug
+
