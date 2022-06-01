@@ -10,7 +10,7 @@
         <result property="catelogId" column="catelog_id"/>
         <result property="brandName" column="brand_name"/>
         <result property="catelogName" column="catelog_name"/>
-    </resultMap>
+    </resultMap><update id="updateCategory"> </update>
 
 
 </mapper>

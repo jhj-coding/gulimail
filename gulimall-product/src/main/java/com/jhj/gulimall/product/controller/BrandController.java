@@ -4,7 +4,10 @@ import java.util.Arrays;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.jhj.common.vaild.AddGroup;
+import com.jhj.common.vaild.UpdateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +19,7 @@ import com.jhj.gulimall.product.service.BrandService;
 import com.jhj.common.utils.PageUtils;
 import com.jhj.common.utils.R;
 
+import javax.validation.Valid;
 
 
 /**
@@ -59,7 +63,7 @@ public class BrandController {
      */
     @RequestMapping("/save")
     //@RequiresPermissions("product:brand:save")
-    public R save(@RequestBody BrandEntity brand){
+    public R save(@RequestBody @Validated({AddGroup.class}) BrandEntity brand){
 		brandService.save(brand);
 
         return R.ok();
@@ -70,8 +74,8 @@ public class BrandController {
      */
     @RequestMapping("/update")
     //@RequiresPermissions("product:brand:update")
-    public R update(@RequestBody BrandEntity brand){
-		brandService.updateById(brand);
+    public R update(@Validated({UpdateGroup.class}) @RequestBody BrandEntity brand){
+		brandService.updateDetail(brand);
 
         return R.ok();
     }
