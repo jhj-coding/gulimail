@@ -10,6 +10,7 @@ import com.jhj.gulimall.product.entity.CategoryEntity;
 import com.jhj.gulimall.product.service.CategoryBrandRelationService;
 import com.jhj.gulimall.product.service.CategoryService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -66,10 +67,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return (Long[]) parentPath.toArray(new Long[parentPath.size()]);
     }
 
+    @Transactional
     @Override
     public void updateCascade(CategoryEntity category) {
         this.updateById(category);
-        categoryBrandRelationService.updateCategory(category.getCatId(),category.getName())
+        categoryBrandRelationService.updateCategory(category.getCatId(),category.getName());
     }
 
     private List<Long> findParentPath(Long catelogId,List<Long> paths){

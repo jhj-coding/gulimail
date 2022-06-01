@@ -11,6 +11,7 @@ import com.jhj.gulimall.product.service.BrandService;
 import com.jhj.gulimall.product.service.CategoryBrandRelationService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class BrandServiceImpl extends ServiceImpl<BrandDao, BrandEntity> impleme
         return new PageUtils(page);
     }
 
+    @Transactional
     @Override
     public void updateDetail(BrandEntity brand) {
         this.updateById(brand);

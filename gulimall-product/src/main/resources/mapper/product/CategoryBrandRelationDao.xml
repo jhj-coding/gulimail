@@ -10,7 +10,10 @@
         <result property="catelogId" column="catelog_id"/>
         <result property="brandName" column="brand_name"/>
         <result property="catelogName" column="catelog_name"/>
-    </resultMap><update id="updateCategory"> </update>
+    </resultMap>
+    <update id="updateCategory">
+        UPDATE `pms_category_brand_relation` SET catelog_name=#{name} WHERE catalog_id=#{catId}
+    </update>
 
 
 </mapper>
