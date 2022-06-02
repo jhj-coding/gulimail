@@ -58,7 +58,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         AttrEntity attrEntity = new AttrEntity();
         BeanUtils.copyProperties(attr, attrEntity);
         this.save(attrEntity);
-        if (attr.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode()) {
+        if (attr.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode() && attr.getAttrGroupId()!=null) {
             AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
             relationEntity.setAttrGroupId(attr.getAttrGroupId());
             relationEntity.setAttrId(attrEntity.getAttrId());
@@ -90,7 +90,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             if ("base".equalsIgnoreCase(type)) {
                 AttrAttrgroupRelationEntity relationEntity = relationDao.selectOne(new QueryWrapper<AttrAttrgroupRelationEntity>()
                         .eq("attr_id", attrEntity.getAttrId()));
-                if (relationEntity != null) {
+                if (relationEntity != null && relationEntity.getAttrGroupId()!=null) {
 
                     attrRespVo.setGroupName(attrGroupDao.selectById(relationEntity.getAttrGroupId()).getAttrGroupName());
                 }
@@ -175,6 +175,35 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         }).collect(Collectors.toList());
 
         relationDao.deleteBatchRelation(collect);
+    }
+
+    @Override
+    public PageUtils getNoRelationAttr(Map<String, Object> params, Long attrgroupId) {
+        AttrGroupEntity attrGroupEntity=attrGroupDao.selectById(attrgroupId);
+        Long catelogId = attrGroupEntity.getCatelogId();
+
+        List<AttrGroupEntity> groupEntities = attrGroupDao.selectList(new QueryWrapper<AttrGroupEntity>().eq("catelog_id", catelogId));
+        List<Long> collect = groupEntities.stream().map((item) -> {
+            return item.getAttrGroupId();
+        }).collect(Collectors.toList());
+
+        List<AttrAttrgroupRelationEntity> attr_group_id = relationDao.selectList(new QueryWrapper<AttrAttrgroupRelationEntity>().in("attr_group_id", collect));
+        List<Long> collect1 = attr_group_id.stream().map((item) -> {
+            return item.getAttrId();
+        }).collect(Collectors.toList());
+        QueryWrapper<AttrEntity> wrapper = new QueryWrapper<AttrEntity>().eq("catelog_id", catelogId).eq("attr_ttype",ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode());
+        if (collect1!=null && collect1.size()>0){
+            wrapper.notIn("attr_id", collect1);
+        }
+        String key = (String) params.get("key");
+        if (!StringUtils.isEmpty(key)){
+            wrapper.and((w)->{
+                w.eq("attr_id",key).or().like("attr_name",key);
+            });
+
+        }
+        IPage<AttrEntity> page = this.page(new Query<AttrEntity>().getPage(params), wrapper);
+        return new PageUtils(page);
     }
 
 }
