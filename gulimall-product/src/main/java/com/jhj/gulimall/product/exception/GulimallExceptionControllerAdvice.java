@@ -36,7 +36,7 @@ public class GulimallExceptionControllerAdvice {
     //校验异常
     @ExceptionHandler(value = Throwable.class)
     public R handleVaildExceptinon(Throwable e){
-
+        log.error(e.getMessage());
         return R.error(BizCodeEnume.UNKNOW_EXCEPTION.getCode(), BizCodeEnume.UNKNOW_EXCEPTION.getMsg());
     }
 }
