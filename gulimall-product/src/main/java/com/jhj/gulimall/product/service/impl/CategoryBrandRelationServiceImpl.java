@@ -12,12 +12,14 @@ import com.jhj.gulimall.product.dao.CategoryDao;
 import com.jhj.gulimall.product.entity.BrandEntity;
 import com.jhj.gulimall.product.entity.CategoryBrandRelationEntity;
 import com.jhj.gulimall.product.entity.CategoryEntity;
+import com.jhj.gulimall.product.service.BrandService;
 import com.jhj.gulimall.product.service.CategoryBrandRelationService;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service("categoryBrandRelationService")
@@ -28,6 +30,8 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
 
     @Resource
     CategoryDao categoryDao;
+    @Resource
+    BrandService brandService;
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<CategoryBrandRelationEntity> page = this.page(
@@ -62,4 +66,16 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
         this.baseMapper.updateCategory(catId,name);
     }
 
+    @Override
+    public List<BrandEntity> getBrandsByCatId(Long catId) {
+        List<CategoryBrandRelationEntity> catelog_id = this.baseMapper.selectList(new QueryWrapper<CategoryBrandRelationEntity>().eq("catelog_id", catId));
+        List<BrandEntity> collect = catelog_id.stream().map(item -> {
+            Long brandId = item.getBrandId();
+            BrandEntity byId = brandService.getById(brandId);
+            return byId;
+        }).collect(Collectors.toList());
+        return collect;
+    }
+
+//    二分查找
 }
