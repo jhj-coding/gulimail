@@ -1,18 +1,18 @@
 package com.jhj.gulimall.product.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.jhj.common.utils.PageUtils;
+import com.jhj.common.utils.R;
+import com.jhj.gulimall.product.entity.CategoryBrandRelationEntity;
+import com.jhj.gulimall.product.service.CategoryBrandRelationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import com.jhj.gulimall.product.entity.CategoryBrandRelationEntity;
-import com.jhj.gulimall.product.service.CategoryBrandRelationService;
-import com.jhj.common.utils.PageUtils;
-import com.jhj.common.utils.R;
 
 
 
@@ -40,8 +40,10 @@ public class CategoryBrandRelationController {
                         new QueryWrapper<CategoryBrandRelationEntity>().eq("brand_id",brandId));
         return R.ok().put("data", data);
     }
-
-
+    @PostMapping("/brand/list")
+    public R relationBrandsList(@RequestParam("ids") Long id){
+        return R.ok().put("id",id);
+    }
     /**
      * 列表
      */

@@ -5,10 +5,10 @@ spring:
         server-addr: 121.5.251.250:8848
     gateway:
       routes: #优先级从上往下
-        - id: test_route
-          uri: https://www.baidu.com
-          predicates:
-            - Query=url,baidu
+#        - id: test_route
+#          uri: https://www.baidu.com
+#          predicates:
+#            - Query=url,baidu
         - id: product_route
           uri: lb://gulimall-product #负载均衡
           predicates:
@@ -21,6 +21,12 @@ spring:
             - Path=/api/thirdparty/** #请求地址有api前缀
           filters:
             - RewritePath=/api/thirdparty/(?<segment>.*),/$\{segment}
+        - id: member_route
+          uri: lb://gulimall-member #负载均衡
+          predicates:
+            - Path=/api/member/** #请求地址有api前缀
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
         - id: admin_route
           uri: lb://renren-fast #负载均衡
           predicates:
