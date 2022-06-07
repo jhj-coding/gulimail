@@ -2,13 +2,13 @@ package com.jhj.gulimall.product.vo;
 
 import lombok.Data;
 
-/**
- * @author jhj
- * @data 2022/6/6 - 21:24
- */
 @Data
 public class BrandVo {
 
+    /**
+     * "brandId": 0,
+     * "brandName": "string",
+     */
     private Long brandId;
-    private String brandName;
+    private String  brandName;
 }
