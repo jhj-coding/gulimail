@@ -3,10 +3,12 @@ package com.jhj.gulimall.product.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jhj.common.to.SpuBoundTo;
 import com.jhj.common.utils.PageUtils;
 import com.jhj.common.utils.Query;
 import com.jhj.gulimall.product.dao.SpuInfoDao;
 import com.jhj.gulimall.product.entity.*;
+import com.jhj.gulimall.product.fegin.CouponFeginService;
 import com.jhj.gulimall.product.service.*;
 import com.jhj.gulimall.product.vo.*;
 import org.springframework.beans.BeanUtils;
@@ -17,7 +19,6 @@ import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -37,6 +38,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     SkuImagesService skuImagesService;
     @Resource
     SkuSaleAttrValueService skuSaleAttrValueService;
+    @Resource
+    CouponFeginService couponFeginService;
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<SpuInfoEntity> page = this.page(
@@ -78,6 +81,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         }).collect(Collectors.toList());
         attrValueService.saveProductAttr(collect);
 
+        Bounds bounds = vo.getBounds();
+        SpuBoundTo spuBoundTo = new SpuBoundTo();
+        BeanUtils.copyProperties(bounds,spuBoundTo);
+        spuBoundTo.setSpuId(spuInfoEntity.getId());
+        couponFeginService.saveSpuBounds(spuBoundTo);
+
         List<Skus> skus = vo.getSkus();
         if (skus!=null&&skus.size()>0){
             skus.forEach(item->{
@@ -114,6 +123,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     return attrValueEntity;
                 }).collect(Collectors.toList());
                 skuSaleAttrValueService.saveBatch(collect2);
+
+
+
             });
         }
 
