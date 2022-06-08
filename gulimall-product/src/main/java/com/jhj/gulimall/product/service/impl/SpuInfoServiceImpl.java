@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -135,13 +136,13 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 SkuRedutionTo skuRedutionTo=new SkuRedutionTo();
                 BeanUtils.copyProperties(item,skuRedutionTo);
                 skuRedutionTo.setSkuId(skuInfoEntity.getSkuId());
-                if (skuRedutionTo.getFullCount()>0&&skuRedutionTo.getFullPrice()>0){
+                if (skuRedutionTo.getFullCount()>0||skuRedutionTo.getFullPrice().compareTo(new BigDecimal(0))==1){
+                    R r1 = couponFeginService.saveSkuReduction(skuRedutionTo);
+                    if (r1.getCode()!=0){
+                        log.error("远程失败");
+                    }
+                }
 
-                }
-                R r1 = couponFeginService.saveSkuReduction(skuRedutionTo);
-                if (r1.getCode()!=0){
-                    log.error("远程失败");
-                }
             });
         }
 
