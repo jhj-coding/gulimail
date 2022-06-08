@@ -4,12 +4,9 @@ import java.util.Arrays;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.jhj.common.to.SkuRedutionTo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.jhj.gulimall.coupon.entity.SkuFullReductionEntity;
 import com.jhj.gulimall.coupon.service.SkuFullReductionService;
@@ -30,6 +27,16 @@ import com.jhj.common.utils.R;
 public class SkuFullReductionController {
     @Autowired
     private SkuFullReductionService skuFullReductionService;
+
+    /**
+     * 列表
+     */
+    @PostMapping("/saveinfo")
+    //@RequiresPermissions("coupon:skufullreduction:list")
+    public R saveInfo(@RequestBody SkuRedutionTo skuRedutionTo){
+        skuFullReductionService.saveSkuReduction(skuRedutionTo);
+        return R.ok();
+    }
 
     /**
      * 列表

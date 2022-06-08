@@ -3,14 +3,17 @@ package com.jhj.gulimall.product.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jhj.common.to.SkuRedutionTo;
 import com.jhj.common.to.SpuBoundTo;
 import com.jhj.common.utils.PageUtils;
 import com.jhj.common.utils.Query;
+import com.jhj.common.utils.R;
 import com.jhj.gulimall.product.dao.SpuInfoDao;
 import com.jhj.gulimall.product.entity.*;
 import com.jhj.gulimall.product.fegin.CouponFeginService;
 import com.jhj.gulimall.product.service.*;
 import com.jhj.gulimall.product.vo.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,7 +88,10 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         SpuBoundTo spuBoundTo = new SpuBoundTo();
         BeanUtils.copyProperties(bounds,spuBoundTo);
         spuBoundTo.setSpuId(spuInfoEntity.getId());
-        couponFeginService.saveSpuBounds(spuBoundTo);
+        R r = couponFeginService.saveSpuBounds(spuBoundTo);
+        if (r.getCode()!=0){
+            log.error("远程失败");
+        }
 
         List<Skus> skus = vo.getSkus();
         if (skus!=null&&skus.size()>0){
@@ -112,6 +118,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     skuImagesEntity.setImgUrl(img.getImgUrl());
                     skuImagesEntity.setDefaultImg(img.getDefaultImg());
                     return skuImagesEntity;
+                }).filter(entity->{
+                    return !StringUtils.isEmpty(entity.getImgUrl());
                 }).collect(Collectors.toList());
                 skuImagesService.saveBatch(collect1);
 
@@ -124,8 +132,16 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 }).collect(Collectors.toList());
                 skuSaleAttrValueService.saveBatch(collect2);
 
+                SkuRedutionTo skuRedutionTo=new SkuRedutionTo();
+                BeanUtils.copyProperties(item,skuRedutionTo);
+                skuRedutionTo.setSkuId(skuInfoEntity.getSkuId());
+                if (skuRedutionTo.getFullCount()>0&&skuRedutionTo.getFullPrice()>0){
 
-
+                }
+                R r1 = couponFeginService.saveSkuReduction(skuRedutionTo);
+                if (r1.getCode()!=0){
+                    log.error("远程失败");
+                }
             });
         }
 

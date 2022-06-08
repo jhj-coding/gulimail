@@ -1,5 +1,6 @@
 package com.jhj.gulimall.product.fegin;
 
+import com.jhj.common.to.SkuRedutionTo;
 import com.jhj.common.to.SpuBoundTo;
 import com.jhj.common.utils.R;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -14,4 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface CouponFeginService {
     @PostMapping("/coupon/spubounds/save")
     R saveSpuBounds(@RequestBody SpuBoundTo spuBoundTo);
+
+    @PostMapping("/coupon/skufullreduction/saveinfo")
+    R saveSkuReduction(@RequestBody SkuRedutionTo skuRedutionTo);
 }
