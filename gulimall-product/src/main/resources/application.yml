@@ -1,4 +1,6 @@
 logging:
   level:
     com.jhj.gulimall: debug
-
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss

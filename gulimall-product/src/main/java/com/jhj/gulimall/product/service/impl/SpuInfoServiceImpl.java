@@ -44,6 +44,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     SkuSaleAttrValueService skuSaleAttrValueService;
     @Resource
     CouponFeginService couponFeginService;
+
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<SpuInfoEntity> page = this.page(
@@ -57,20 +58,20 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Override
     @Transactional
     public void saveSpuInfo(SpuSaveVo vo) {
-        SpuInfoEntity spuInfoEntity=new SpuInfoEntity();
-        BeanUtils.copyProperties(vo,spuInfoEntity);
+        SpuInfoEntity spuInfoEntity = new SpuInfoEntity();
+        BeanUtils.copyProperties(vo, spuInfoEntity);
         spuInfoEntity.setCreateTime(new Date());
         spuInfoEntity.setUpdateTime(new Date());
         this.saveBaseSpuInfo(spuInfoEntity);
 
-        List<String> decript=vo.getDecript();
-        SpuInfoDescEntity descEntity=new SpuInfoDescEntity();
+        List<String> decript = vo.getDecript();
+        SpuInfoDescEntity descEntity = new SpuInfoDescEntity();
         descEntity.setSpuId(spuInfoEntity.getId());
-        descEntity.setDecript(String.join(",",decript));
+        descEntity.setDecript(String.join(",", decript));
         this.saveSpuInfoDesc(descEntity);
 
         List<String> images = vo.getImages();
-        spuImagesService.saveImages(spuInfoEntity.getId(),images);
+        spuImagesService.saveImages(spuInfoEntity.getId(), images);
 
         List<BaseAttrs> baseAttrs = vo.getBaseAttrs();
         List<ProductAttrValueEntity> collect = baseAttrs.stream().map(attr -> {
@@ -87,26 +88,26 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
         Bounds bounds = vo.getBounds();
         SpuBoundTo spuBoundTo = new SpuBoundTo();
-        BeanUtils.copyProperties(bounds,spuBoundTo);
+        BeanUtils.copyProperties(bounds, spuBoundTo);
         spuBoundTo.setSpuId(spuInfoEntity.getId());
         R r = couponFeginService.saveSpuBounds(spuBoundTo);
-        if (r.getCode()!=0){
+        if (r.getCode() != 0) {
             log.error("远程失败");
         }
 
         List<Skus> skus = vo.getSkus();
-        if (skus!=null&&skus.size()>0){
-            skus.forEach(item->{
-                String defaultImg="";
+        if (skus != null && skus.size() > 0) {
+            skus.forEach(item -> {
+                String defaultImg = "";
 
                 for (Images img : item.getImages()) {
-                    if (img.getDefaultImg()==1){
-                        defaultImg=img.getImgUrl();
+                    if (img.getDefaultImg() == 1) {
+                        defaultImg = img.getImgUrl();
                     }
                 }
 
                 SkuInfoEntity skuInfoEntity = new SkuInfoEntity();
-                BeanUtils.copyProperties(item,skuInfoEntity);
+                BeanUtils.copyProperties(item, skuInfoEntity);
                 skuInfoEntity.setBrandId(spuInfoEntity.getBrandId());
                 skuInfoEntity.setCatalogId(spuInfoEntity.getCatalogId());
                 skuInfoEntity.setSaleCount(0L);
@@ -119,7 +120,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     skuImagesEntity.setImgUrl(img.getImgUrl());
                     skuImagesEntity.setDefaultImg(img.getDefaultImg());
                     return skuImagesEntity;
-                }).filter(entity->{
+                }).filter(entity -> {
                     return !StringUtils.isEmpty(entity.getImgUrl());
                 }).collect(Collectors.toList());
                 skuImagesService.saveBatch(collect1);
@@ -133,12 +134,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 }).collect(Collectors.toList());
                 skuSaleAttrValueService.saveBatch(collect2);
 
-                SkuRedutionTo skuRedutionTo=new SkuRedutionTo();
-                BeanUtils.copyProperties(item,skuRedutionTo);
+                SkuRedutionTo skuRedutionTo = new SkuRedutionTo();
+                BeanUtils.copyProperties(item, skuRedutionTo);
                 skuRedutionTo.setSkuId(skuInfoEntity.getSkuId());
-                if (skuRedutionTo.getFullCount()>0||skuRedutionTo.getFullPrice().compareTo(new BigDecimal(0))==1){
+                if (skuRedutionTo.getFullCount() > 0 || skuRedutionTo.getFullPrice().compareTo(new BigDecimal(0)) == 1) {
                     R r1 = couponFeginService.saveSkuReduction(skuRedutionTo);
-                    if (r1.getCode()!=0){
+                    if (r1.getCode() != 0) {
                         log.error("远程失败");
                     }
                 }
@@ -156,6 +157,41 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Override
     public void saveSpuInfoDesc(SpuInfoDescEntity descEntity) {
         spuInfoDescService.saveSpuInfoDesc(descEntity);
+    }
+
+    @Override
+    public PageUtils queryPageByCondition(Map<String, Object> params) {
+        QueryWrapper<SpuInfoEntity> spuInfoEntityQueryWrapper = new QueryWrapper<>();
+        String key = (String) params.get("key");
+        if (!StringUtils.isEmpty(key)) {
+            spuInfoEntityQueryWrapper.and((w) -> {
+                w.eq("id", key).or().like("spu_name", key);
+            });
+        }
+        String status = (String) params.get("status");
+        if (!StringUtils.isEmpty(status)) {
+            spuInfoEntityQueryWrapper.and((w) -> {
+                w.eq("publish_status", status);
+            });
+        }
+        String brandId = (String) params.get("brandId");
+        if (!StringUtils.isEmpty(brandId)&&!"0".equalsIgnoreCase(brandId)) {
+            spuInfoEntityQueryWrapper.and((w) -> {
+                w.eq("brand_id", brandId);
+            });
+        }
+        String catelogId = (String) params.get("catelogId");
+        if (!StringUtils.isEmpty(catelogId)&&!"0".equalsIgnoreCase(catelogId)) {
+            spuInfoEntityQueryWrapper.and((w) -> {
+                w.eq("catalog_Id", catelogId);
+            });
+        }
+        IPage<SpuInfoEntity> page = this.page(
+                new Query<SpuInfoEntity>().getPage(params),
+                spuInfoEntityQueryWrapper
+        );
+
+        return new PageUtils(page);
     }
 
 }

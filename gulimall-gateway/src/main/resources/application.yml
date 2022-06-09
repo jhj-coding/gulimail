@@ -27,6 +27,12 @@ spring:
             - Path=/api/member/** #请求地址有api前缀
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
+        - id: ware_route
+          uri: lb://gulimall-ware #负载均衡
+          predicates:
+            - Path=/api/ware/** #请求地址有api前缀
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
         - id: admin_route
           uri: lb://renren-fast #负载均衡
           predicates:
