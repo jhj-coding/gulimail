@@ -1,0 +1,42 @@
+package com.jhj.gulimall.search.config;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.HttpAsyncResponseConsumerFactory;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * @Description GulimallElasticSearchConfig
+ * @Author jhj
+ * @Date 2022/6/1310:50
+ **/
+@Configuration
+public class GulimallElasticSearchConfig {
+    @Value("${es.ip}")
+    private String ip;
+    @Value("${es.port}")
+    private Integer port;
+
+    public static final RequestOptions COMMON_OPTIONS;
+
+    static {
+        RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
+//        builder.addHeader("Authorization", "Bearer" + TOKEN);
+//        builder.setHttpAsyncResponseConsumerFactory(
+//                new HttpAsyncResponseConsumerFactory
+//                        .HeapBufferedResponseConsumerFactory(30 * 1024 * 1024 * 1024));
+        COMMON_OPTIONS = builder.build();
+    }
+
+    @Bean
+    public RestHighLevelClient esRestClient() {
+        RestHighLevelClient client = new RestHighLevelClient(
+                RestClient.builder(new HttpHost(this.ip, this.port, "http"))
+        );
+        return client;
+    }
+}

@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 
 @SpringBootTest
-class GulimallProductApplicationTests {
+public class GulimallProductApplicationTests {
     @Autowired
     BrandService brandService;
 
