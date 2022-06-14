@@ -89,7 +89,7 @@ public class WareSkuController {
     //@RequiresPermissions("ware:waresku:delete")
     public R getSkusHasStock(@RequestBody List<Long> skuIds){
         List<SkuHasStockVo> vos = wareSkuService.getSkusHasStock(skuIds);
-        return R.ok().put("data",vos);
+        return R.ok().setData(vos);
     }
 
 

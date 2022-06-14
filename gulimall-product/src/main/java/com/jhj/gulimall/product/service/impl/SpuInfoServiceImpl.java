@@ -1,8 +1,10 @@
 package com.jhj.gulimall.product.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jhj.common.constant.ProductConstant;
 import com.jhj.common.to.SkuRedutionTo;
 import com.jhj.common.to.SpuBoundTo;
 import com.jhj.common.to.es.SkuEsModel;
@@ -12,6 +14,8 @@ import com.jhj.common.utils.R;
 import com.jhj.gulimall.product.dao.SpuInfoDao;
 import com.jhj.gulimall.product.entity.*;
 import com.jhj.gulimall.product.fegin.CouponFeginService;
+import com.jhj.gulimall.product.fegin.SearchFeginService;
+import com.jhj.gulimall.product.fegin.WareFeginService;
 import com.jhj.gulimall.product.service.*;
 import com.jhj.gulimall.product.vo.*;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +51,11 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     BrandService brandService;
     @Resource
     CategoryService categoryService;
+    @Resource
+    WareFeginService wareFeginService;
+    @Resource
+    SearchFeginService searchFeginService;
+
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<SpuInfoEntity> page = this.page(
@@ -177,13 +186,13 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             });
         }
         String brandId = (String) params.get("brandId");
-        if (!StringUtils.isEmpty(brandId)&&!"0".equalsIgnoreCase(brandId)) {
+        if (!StringUtils.isEmpty(brandId) && !"0".equalsIgnoreCase(brandId)) {
             spuInfoEntityQueryWrapper.and((w) -> {
                 w.eq("brand_id", brandId);
             });
         }
         String catelogId = (String) params.get("catelogId");
-        if (!StringUtils.isEmpty(catelogId)&&!"0".equalsIgnoreCase(catelogId)) {
+        if (!StringUtils.isEmpty(catelogId) && !"0".equalsIgnoreCase(catelogId)) {
             spuInfoEntityQueryWrapper.and((w) -> {
                 w.eq("catalog_Id", catelogId);
             });
@@ -198,14 +207,15 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Override
     public void up(Long spuId) {
-        List<SkuInfoEntity>  skuInfoEntities=skuInfoService.getSkusBySpuId(spuId);
+        List<SkuInfoEntity> skuInfoEntities = skuInfoService.getSkusBySpuId(spuId);
+        List<Long> collect3 = skuInfoEntities.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList());
         List<ProductAttrValueEntity> productAttrValueEntities = attrValueService.baseAttrListforspu(spuId);
         List<Long> collect1 = productAttrValueEntities.stream().map(attr -> {
             return attr.getAttrId();
         }).collect(Collectors.toList());
 
-        List<Long> searchAttrIds=attrService.selectSearchAttrs(collect1);
-        Set<Long> idSet=new HashSet<>(searchAttrIds);
+        List<Long> searchAttrIds = attrService.selectSearchAttrs(collect1);
+        Set<Long> idSet = new HashSet<>(searchAttrIds);
         List<SkuEsModel.Attrs> collect2 = productAttrValueEntities.stream().filter(item -> {
             return idSet.contains(item.getAttrId());
         }).map(item -> {
@@ -213,11 +223,24 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             BeanUtils.copyProperties(item, attrs1);
             return attrs1;
         }).collect(Collectors.toList());
+        Map<Long, Boolean> collect4=null;
+        try {
+            R skusHasStock = wareFeginService.getSkusHasStock(collect3);
+             collect4= skusHasStock.getData(new TypeReference<List<SkuHasStockVo>>(){}).stream().collect(Collectors.toMap(SkuHasStockVo::getSkuId, item -> item.getHasStock()));
+        } catch (Exception e) {
+            log.error("库存服务查询异常", e);
+        }
+        Map<Long, Boolean> finalCollect = collect4;
         List<SkuEsModel> collect = skuInfoEntities.stream().map(sku -> {
             SkuEsModel skuEsModel = new SkuEsModel();
-            BeanUtils.copyProperties(sku,skuEsModel);
+            BeanUtils.copyProperties(sku, skuEsModel);
             skuEsModel.setSkuPrice(sku.getPrice());
             skuEsModel.setSkuImg(sku.getSkuDefaultImg());
+            if (finalCollect ==null){
+                skuEsModel.setHasStock(true);
+            }else{
+                skuEsModel.setHasStock(finalCollect.get(sku.getSkuId()));
+            }
             skuEsModel.setHotScore(0L);
             BrandEntity byId = brandService.getById(skuEsModel.getBrandId());
             skuEsModel.setBrandName(byId.getName());
@@ -227,6 +250,14 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             skuEsModel.setAttrs(collect2);
             return skuEsModel;
         }).collect(Collectors.toList());
+
+        R r = searchFeginService.productStatusUp(collect);
+
+        if (r.getCode()==0){
+            baseMapper.updateSpuStatus(spuId, ProductConstant.StatusEnum.SPU_UP.getCode());
+        }else{
+
+        }
     }
 
 }
