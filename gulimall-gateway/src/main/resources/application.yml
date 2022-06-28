@@ -39,6 +39,10 @@ spring:
             - Path=/api/** #请求地址有api前缀
           filters:
             - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
+        - id: gulimall_host
+          uri: lb://gulimall_product #负载均衡
+          predicates:
+            - Host=**.gulimall.com #请求地址有api前缀
   application:
     name: gulimall-gateway
 #测试
