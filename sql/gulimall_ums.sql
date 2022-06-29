@@ -1,10 +1,10 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : 121.5.251.250_3306
+ Source Server         : 192.168.31.190_3306
  Source Server Type    : MySQL
  Source Server Version : 50736
- Source Host           : 121.5.251.250:3306
+ Source Host           : 192.168.31.190:3306
  Source Schema         : gulimall_ums
 
  Target Server Type    : MySQL
