@@ -1,5 +1,7 @@
 package com.jhj.gulimall.product.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -10,8 +12,10 @@ import com.jhj.gulimall.product.entity.CategoryEntity;
 import com.jhj.gulimall.product.service.CategoryBrandRelationService;
 import com.jhj.gulimall.product.service.CategoryService;
 import com.jhj.gulimall.product.vo.Catelog2Vo;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -25,6 +29,8 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
     @Resource
     CategoryBrandRelationService categoryBrandRelationService;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -81,8 +87,21 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return entities;
     }
 
+
     @Override
     public Map<String, List<Catelog2Vo>> getCatalogJson() {
+
+        String catalogJSON=stringRedisTemplate.opsForValue().get("catalogJSON");
+        if (StringUtils.isEmpty(catalogJSON)){
+            Map<String, List<Catelog2Vo>> catalogJsonFromDb = getCatalogJsonFromDb();
+            stringRedisTemplate.opsForValue().set("catalogJSON", JSON.toJSONString(catalogJsonFromDb));
+            return catalogJsonFromDb;
+        }
+
+        return JSON.parseObject(catalogJSON,new TypeReference<Map<String, List<Catelog2Vo>>>(){});
+    }
+    //从数据查询
+    public Map<String, List<Catelog2Vo>> getCatalogJsonFromDb() {
 
         List<CategoryEntity> categoryEntityList=baseMapper.selectList(null);
 

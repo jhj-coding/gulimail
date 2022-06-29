@@ -2,7 +2,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.16.223:8848
+        server-addr: 192.168.31.190:8848
     gateway:
       routes: #优先级从上往下
 #        - id: test_route
