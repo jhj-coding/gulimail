@@ -11,18 +11,26 @@ spring:
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://192.168.31.190:3306/gulimall_pms?useUnicode=true&useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mysql://192.168.16.223:3306/gulimall_pms?useUnicode=true&useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
     driver-class-name: com.mysql.cj.jdbc.Driver
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.31.190:8848
+        server-addr: 192.168.16.223:8848
   application:
     name: gulimall-product
   redis:
-    host: 192.168.31.190
+    host: 192.168.16.223
 #    password:
     port: 6379
+  cache:
+    #类型
+    type: redis
+    redis:
+      time-to-live: 3600000
+      key-prefix: CACHE_
+      use-key-prefix: true
+      cache-null-values: true
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   global-config:

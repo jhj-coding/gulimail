@@ -1,10 +1,10 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : 192.168.31.190_3306
+ Source Server         : 192.168.16.223_3306
  Source Server Type    : MySQL
  Source Server Version : 50736
- Source Host           : 192.168.31.190:3306
+ Source Host           : 192.168.16.223:3306
  Source Schema         : pms_catelog
 
  Target Server Type    : MySQL
