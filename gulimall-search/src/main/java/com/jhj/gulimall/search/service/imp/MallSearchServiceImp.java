@@ -1,15 +1,20 @@
 package com.jhj.gulimall.search.service.imp;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.jhj.common.to.es.SkuEsModel;
+import com.jhj.common.utils.R;
 import com.jhj.gulimall.search.config.GulimallElasticSearchConfig;
 import com.jhj.gulimall.search.constant.EsConstant;
+import com.jhj.gulimall.search.fegin.ProductFeginService;
 import com.jhj.gulimall.search.service.MallSearchService;
+import com.jhj.gulimall.search.vo.AttrResponseVo;
 import com.jhj.gulimall.search.vo.SearchParam;
 import com.jhj.gulimall.search.vo.SearchResult;
 import com.sun.xml.internal.ws.api.policy.SourceModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.join.ScoreMode;
+import org.apache.tomcat.util.buf.UEncoder;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -32,9 +37,11 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,6 +50,8 @@ import java.util.stream.Collectors;
 public class MallSearchServiceImp implements MallSearchService {
     @Resource
     RestHighLevelClient client;
+    @Resource
+    ProductFeginService productFeginService;
     @Override
     public SearchResult search(SearchParam searchParam) {
         SearchResult result=null;
@@ -147,6 +156,34 @@ public class MallSearchServiceImp implements MallSearchService {
             integers.add(i);
         }
         result.setPageNavs(integers);
+
+        if (param.getAttrs()!=null&&param.getAttrs().size()>0) {
+            List<SearchResult.NavVo> collect = param.getAttrs().stream().map(attr -> {
+                SearchResult.NavVo navVo = new SearchResult.NavVo();
+                String[] s = attr.split("_");
+                navVo.setNavValue(s[1]);
+
+                R attrinfo = productFeginService.attrinfo(Long.parseLong(s[0]));
+                if (attrinfo.getCode() == 0) {
+                    AttrResponseVo attr1 = attrinfo.getData("attr", new TypeReference<AttrResponseVo>() {
+                    });
+                    navVo.setNavName(attr1.getAttrName());
+                } else {
+                    navVo.setNavName(s[0]);
+                }
+                String encode=null;
+                try {
+                    encode=URLEncoder.encode("attr", "utf-8");
+                    encode=encode.replace("+","%20");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                String replace = param.get_queryString().replace("&attrs=" + encode, "");
+                navVo.setLink("http://search.gulimall.com/list.html?" + replace);
+                return navVo;
+            }).collect(Collectors.toList());
+            result.setNavs(collect);
+        }
         return result;
     }
 
