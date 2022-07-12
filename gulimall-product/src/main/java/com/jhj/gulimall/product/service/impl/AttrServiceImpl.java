@@ -22,6 +22,7 @@ import com.jhj.gulimall.product.vo.AttrRespVo;
 import com.jhj.gulimall.product.vo.AttrVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,6 +106,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         return pageUtils;
     }
 
+    @Cacheable(value = "attr",key="'attrinfo:'+#root.arg[0]")
     @Override
     public AttrRespVo getAttrInfo(Long attrId) {
         AttrRespVo attrRespVo = new AttrRespVo();

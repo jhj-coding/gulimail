@@ -3,6 +3,7 @@ package com.jhj.gulimall.search.vo;
 import com.jhj.common.to.es.SkuEsModel;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,8 +30,9 @@ public class SearchResult {
     private List<CatalogVo> catalogs;
 
 
-    private List<NavVo> navs;
+    private List<NavVo> navs=new ArrayList<>();
 
+    private List<Long> attrIds=new ArrayList<>();
 
     @Data
     public static class NavVo{

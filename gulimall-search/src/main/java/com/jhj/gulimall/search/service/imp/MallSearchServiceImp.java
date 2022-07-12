@@ -9,6 +9,7 @@ import com.jhj.gulimall.search.constant.EsConstant;
 import com.jhj.gulimall.search.fegin.ProductFeginService;
 import com.jhj.gulimall.search.service.MallSearchService;
 import com.jhj.gulimall.search.vo.AttrResponseVo;
+import com.jhj.gulimall.search.vo.BrandVo;
 import com.jhj.gulimall.search.vo.SearchParam;
 import com.jhj.gulimall.search.vo.SearchResult;
 import com.sun.xml.internal.ws.api.policy.SourceModel;
@@ -102,6 +103,9 @@ public class MallSearchServiceImp implements MallSearchService {
                 return ((Terms.Bucket) item).getKeyAsString();
             }).collect(Collectors.toList());
             attrVo.setAttrValue(attr_value_agg);
+
+            result.getAttrIds().add(l);
+
             attrVos.add(attrVo);
         }
 
@@ -164,6 +168,7 @@ public class MallSearchServiceImp implements MallSearchService {
                 navVo.setNavValue(s[1]);
 
                 R attrinfo = productFeginService.attrinfo(Long.parseLong(s[0]));
+                result.getAttrIds().add(Long.valueOf(s[0]));
                 if (attrinfo.getCode() == 0) {
                     AttrResponseVo attr1 = attrinfo.getData("attr", new TypeReference<AttrResponseVo>() {
                     });
@@ -171,20 +176,47 @@ public class MallSearchServiceImp implements MallSearchService {
                 } else {
                     navVo.setNavName(s[0]);
                 }
-                String encode=null;
-                try {
-                    encode=URLEncoder.encode("attr", "utf-8");
-                    encode=encode.replace("+","%20");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                String replace = param.get_queryString().replace("&attrs=" + encode, "");
+                String replace = replaceQueryString(param,attr,"attrs");
                 navVo.setLink("http://search.gulimall.com/list.html?" + replace);
                 return navVo;
             }).collect(Collectors.toList());
             result.setNavs(collect);
         }
+        if(param.getBrandId()!=null &&  param.getBrandId().size()>0){
+            List<SearchResult.NavVo> navs = result.getNavs();
+
+            SearchResult.NavVo navVo = new SearchResult.NavVo();
+            navVo.setNavName("品牌");
+            R r = productFeginService.brandInfo(param.getBrandId());
+            if (r.getCode()==0){
+                List<BrandVo> data = r.getData("", new TypeReference<List<BrandVo>>() {
+                });
+                StringBuffer buffer=new StringBuffer();
+                String replace="";
+                for (BrandVo datum : data) {
+                    buffer.append(datum.getBrandName());
+                    replace= replaceQueryString(param,datum.getBrandId()+"","brandId");
+                }
+                navVo.setNavValue(buffer.toString());
+                navVo.setLink("http://search.gulimall.com/list.html?" + replace);
+            }
+            navs.add(navVo);
+        }
+
+
         return result;
+    }
+
+    private String replaceQueryString(SearchParam param,String attr,String key) {
+        String encode=null;
+        try {
+            encode=URLEncoder.encode(attr, "utf-8");
+            encode=encode.replace("+","%20");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String replace = param.get_queryString().replace("&"+key+"=" + encode, "");
+        return replace;
     }
 
     private SearchRequest buildSearchRequrest(SearchParam searchParam) {
