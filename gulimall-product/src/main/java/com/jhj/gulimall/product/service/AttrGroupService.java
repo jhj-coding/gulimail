@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.jhj.common.utils.PageUtils;
 import com.jhj.gulimall.product.entity.AttrGroupEntity;
 import com.jhj.gulimall.product.vo.AttrGroupWithAttrsVo;
+import com.jhj.gulimall.product.vo.SkuItemAttrGroupVo;
+import com.jhj.gulimall.product.vo.SkuItemVo;
 
 import java.util.List;
 import java.util.Map;
@@ -22,5 +24,7 @@ public interface AttrGroupService extends IService<AttrGroupEntity> {
     PageUtils queryPage(Map<String, Object> params, Long catelogId);
 
     List<AttrGroupWithAttrsVo> getAttrGroupWithAttrsBycatelogId(Long catelogId);
+
+    List<SkuItemAttrGroupVo> getAttrGroupWithAttrsBySpuId(Long spuId, Long catalogId);
 }
 

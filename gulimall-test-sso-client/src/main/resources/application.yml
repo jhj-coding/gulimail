@@ -1,0 +1,23 @@
+spring:
+  rabbitmq:
+    host: 192.168.1.104
+    port: 5672
+    virtual-host: /
+    #发送端抵达Broker确认
+    publisher-confirms: true
+    #发送端抵达队列 确认
+    publisher-returns: true
+    #只要抵达队列，一异步发送优先回调我们这个returnconfirm
+    template:
+      mandatory: true
+    #手动ack 消息 将接收端自动回复改为手动 保证消息不会丢失 若处理消息时宕机，则消息被收回
+    listener:
+      simple:
+        acknowledge-mode: manual
+  task:
+    execution:
+      pool:
+        #线程数
+        core-size: 20
+        #最大数
+        max-size: 50

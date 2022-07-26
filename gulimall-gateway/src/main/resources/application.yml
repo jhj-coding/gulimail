@@ -42,11 +42,15 @@ spring:
         - id: gulimall_host
           uri: lb://gulimall-product #负载均衡
           predicates:
-            - Host=gulimall.com #请求地址有api前缀
+            - Host=gulimall.com,item.gulimall.com #请求地址有api前缀
         - id: gulimall_search_host
           uri: lb://gulimall-search #负载均衡
           predicates:
             - Host=search.gulimall.com #请求地址有api前缀
+        - id: gulimall_search_host
+          uri: lb://gulimall-auth-server #负载均衡
+          predicates:
+            - Host=auth.gulimall.com #请求地址有api前缀
   application:
     name: gulimall-gateway
 #测试

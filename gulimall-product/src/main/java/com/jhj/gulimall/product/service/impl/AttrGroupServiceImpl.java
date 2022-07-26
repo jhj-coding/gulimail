@@ -5,6 +5,8 @@ import com.jhj.common.utils.Query;
 import com.jhj.gulimall.product.entity.AttrEntity;
 import com.jhj.gulimall.product.service.AttrService;
 import com.jhj.gulimall.product.vo.AttrGroupWithAttrsVo;
+import com.jhj.gulimall.product.vo.SkuItemAttrGroupVo;
+import com.jhj.gulimall.product.vo.SkuItemVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -72,6 +74,13 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
             return attrGroupWithAttrsVo;
         }).collect(Collectors.toList());
         return collect;
+    }
+
+    @Override
+    public List<SkuItemAttrGroupVo> getAttrGroupWithAttrsBySpuId(Long spuId, Long catalogId) {
+
+        List<SkuItemAttrGroupVo> vos=this.baseMapper.getAttrGroupWithAttrsBySpuId(spuId,catalogId);
+        return vos;
     }
 
 }
